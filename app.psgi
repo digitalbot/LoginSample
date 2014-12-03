@@ -7,6 +7,8 @@ use lib File::Spec->catdir(dirname(__FILE__), 'extlib', 'lib', 'perl5');
 use lib File::Spec->catdir(dirname(__FILE__), 'lib');
 use Amon2::Lite;
 
+use Data::Dumper;
+
 our $VERSION = '0.13';
 
 # put your configuration here
@@ -21,11 +23,17 @@ sub load_config {
             '',
             '',
         ],
+        'MongoDB' => {
+            database => 'sample',
+            host     => 'localhost',
+            port     => '27017',
+        },
     }
 }
 
 get '/' => sub {
     my $c = shift;
+    $c->mongo->get_collection('thing')->insert({unko => 'unkounkounko'});
     return $c->render('index.tt');
 };
 
@@ -33,9 +41,9 @@ get '/' => sub {
 __PACKAGE__->load_plugin('Web::CSRFDefender' => {
     post_only => 1,
 });
-# __PACKAGE__->load_plugin('DBI');
-# __PACKAGE__->load_plugin('Web::FillInFormLite');
-# __PACKAGE__->load_plugin('Web::JSON');
+__PACKAGE__->load_plugin('+LoginSample::Plugin::MongoDB');
+__PACKAGE__->load_plugin('Web::FillInFormLite');
+__PACKAGE__->load_plugin('Web::JSON');
 
 __PACKAGE__->enable_session();
 
